@@ -1,0 +1,231 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Aug 14 17:29:37 2024
+
+@author: longf
+"""
+
+## Initiate Global Variables
+    ## Line Variables
+threshold = [ False ]*5
+value = [ 0.0 ]*5
+change = [ 0.0 ]*5
+cow = 0
+year = 0
+anyThreshold = False
+newCountry = False
+nonContinuousYear = False
+prevYear = 0
+prevCow = 0
+print( "!!! COW:", cow, "Year:", year, "prevCOW:", prevCow, "prevYear:", prevYear )
+
+    ## Period Variables
+currentPeriod = False
+reset = False
+resetTimer = 0
+periodCount = 0
+periodTimer = 0
+periodStartYear = 0
+periodEndYear = 0
+periodStartValue = [ 0.0 ]*5
+periodEndValue = [ 0.0 ]*5
+periodChange = [ 0.0 ]*5
+
+import csv
+with open ( 'C:/Users/longf/V-Dem Change Calculation.csv', 'r' ) as csv_file:
+    with open( 'V-Dem Backsliding(2).csv', 'w' ) as s :
+        
+        inputFile = csv.reader(csv_file, delimiter=',')
+        outputFile = csv.writer(s)
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        
+        ## Print Header
+        output = [""]*20
+        output[ 0 ] = "COW Code"
+        output[ 1 ] = "Period #"
+        output[ 2 ] = "Starting Year"
+        output[ 3 ] = "Ending Year"
+        output[ 4 ] = "Total Years"
+        
+        output[ 5 ] = "Polyarchy (Start)"
+        output[ 6 ] = "Polyarchy (End)"
+        output[ 7 ] = "Polyarchy (Cumulative Change)"
+        
+        output[ 8 ] = "LibDem (Start)"
+        output[ 9 ] = "LibDem (End)"
+        output[ 10 ] = "LibDem (Cumulative Change)"
+        
+        output[ 11 ] = "PartipDem (Start)"
+        output[ 12 ] = "PartipDem (End)"
+        output[ 13 ] = "PartipDem (Cumulative Change)"
+        
+        output[ 14 ] = "DelibDem (Start)"
+        output[ 15 ] = "DelibDem (End)"
+        output[ 16 ] = "DelibDem (Cumulative Change)"
+        
+        output[ 17 ] = "EgalDem (Start)"
+        output[ 18 ] = "EgalDem (End)"
+        output[ 19 ] = "EgalDem (Cumulative Change)"
+        
+        outputFile.writerow( output )
+        next( inputFile )
+        
+        
+        
+        ## Define Functions
+            ## Read in Data
+        def dataRead() :
+            
+            print( "77: dataRead :", line[0], line[1])
+            
+            cow = line[ 0 ]
+            year = line[ 1 ]
+            
+            for i in range( 5 ) :
+                a = 4 * i
+                x = 6 + a
+                y = 8 + a
+                z = 9 + a
+                change[i] = round(float(line[y]), 3)
+                value[i] = round(float(line[x]), 3)
+                if line[z] == "TRUE" :
+                    threshold[i] = True
+                    anyThreshold = True
+                else :
+                    threshold[i] = False
+            
+            if prevCow != cow :
+                print( "96: dataRead :", "COW:", cow, "Year:", year, "prevCOW:", prevCow, "prevYear:", prevYear )
+                newCountryProtocol()
+            
+            if year != prevYear + 1 :
+                print( "100: dataRead :", "COW:", cow, "Year:", year, "prevCOW:", prevCow, "prevYear:", prevYear)
+                nonContinuousYearProtocol()
+            
+            ## Start Period
+        def startPeriod() :
+            print( "103: startPeriod" )
+            """currentPeriod = True
+            periodCount += 1
+            periodTimer = 5
+            periodStartYear = year
+            reset = False
+            resetTimer = 3
+            for i in range( 5 ) :
+                periodStartValue[i] = value[i]"""
+            
+            ## End Period
+        def endPeriod() : 
+            print( "115: endPeriod" )
+            """
+            periodEndYear = year
+            for i in range( 5 ) :
+                periodEndValue[i] = value[i]
+            outputPrinting()
+            currentPeriod = False
+            periodTimer = 0
+            reset = False
+            resetTimer = 0
+            periodStartYear = 0
+            periodEndYear = 0
+            periodStartValue = [ 0.0 ]*5
+            periodEndValue = [ 0.0 ]*5
+            periodChange = [ 0.0 ]*5"""
+            
+            ## New Country Protocol
+        def newCountryProtocol() :
+            print( "133: newCountryProtocol", "COW:", cow, "Year:", year, "prevCOW:", prevCow, "prevYear:", prevYear )
+            newCountry = True
+            periodCount = 0
+            
+            if currentPeriod is True :
+                endPeriod()
+            
+            ## Non-Continuous Year Protocol
+        def nonContinuousYearProtocol() :
+            print( "142: nonContinuousYearProtocol", "COW:", cow, "Year:", year, "prevCOW:", prevCow, "prevYear:", prevYear )
+            """nonContinuousYear = True"""
+            
+            ## Reset Protocol
+        def resetProtocol() :
+            print( "147: resetProtocol" )
+            """if resetTimer > 0 : 
+                resetTimer -= 1
+            
+            if (anyThreshold is True) and (reset is False) and (resetTimer == 0) :
+                
+                reset = True
+                periodTimer = 6"""
+            
+            ## Period Operating Protocol
+        def periodOperatingProtocol () :
+            
+            print( "158: periodOperatingProtocol" )
+            """
+            resetProtocol()
+            
+            flag = False
+            for i in range(5):
+                periodChange[i] += change[i]
+                if periodChange[i] < 0 :
+                    flag = True
+            
+            if flag is False :
+                endPeriod()
+            
+            if periodTimer == 1 :
+                endPeriod()
+            else :
+                periodTimer -= 1"""
+            
+            ## Output Printing
+        def outputPrinting() :
+            
+            print( "179: outputPrinting" )
+            """
+            output[ 0 ] = cow                                       ##COW Code
+            output[ 1 ] = periodCount                               ##Period #
+            output[ 2 ] = periodStartYear                           ##Starting Year
+            output[ 3 ] = periodEndYear                             ##Ending Year
+            output[ 4 ] = ( periodEndYear - periodStartYear )       ##Total Years
+            output[ 5 ] = periodStartValue[0]                       ##Polyarchy (Start)
+            output[ 6 ] = periodEndYear[0]                          ##Polyarchy (End)
+            output[ 7 ] = periodChange[0]                           ##Polyarchy (Cumulative Change)
+            output[ 8 ] = periodStartValue[1]                       ##LibDem (Start)
+            output[ 9 ] = periodEndValue[1]                         ##LibDem (End)
+            output[ 10 ] = periodChange[1]                          ##LibDem (Cumulative Change)
+            output[ 11 ] = periodStartValue[2]                      ##PartipDem (Start)
+            output[ 12 ] = periodEndValue[2]                        ##PartipDem (End)
+            output[ 13 ] = periodChange[2]                          ##PartipDem (Cumulative Change)
+            output[ 14 ] = periodStartValue[3]                      ##DelibDem (Start)
+            output[ 15 ] = periodEndValue[3]                        ##DelibDem (End)
+            output[ 16 ] = periodChange[3]                          ##DelibDem (Cumulative Change)
+            output[ 17 ] = periodStartValue[4]                      ##EgalDem (Start)
+            output[ 18 ] = periodEndValue[4]                        ##EgalDem (End)
+            output[ 19 ] = periodChange[4]                          ##EgalDem (Cumulative Change)
+            print( "Output :", output )
+            """
+            ## New Period Detection Protocol
+        def newPeriodDetection() :
+            
+            print( "206: newPeriodDetection" )
+            """if anyThreshold is True :
+                
+                startPeriod()"""
+            
+        
+        for line in csv_reader :
+            
+            dataRead()
+            
+            if currentPeriod is True :
+                
+                periodOperatingProtocol()
+                
+            else : 
+                
+                newPeriodDetection()
+            
+            prevYear = year
+            prevCow = cow
+            ##print( "COW:", cow, "Year:", year, "prevCOW:", prevCow, "prevYear:", prevYear )
