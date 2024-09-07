@@ -1,0 +1,242 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Aug 10 16:02:40 2024
+
+@author: longf
+"""
+
+import csv
+with open ( 'C:/Users/longf/Documents/Data Analysis/V-Dem Dataset (CSV).csv', 'r' ) as csv_file:
+    with open( 'V-Dem Change Calculation.csv', 'w' ) as f :
+        
+        inputFile = csv.reader(csv_file, delimiter=',')
+        outputFile = csv.writer(f)
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        
+        lineNum = 1
+        prevCOW = 0
+        cow = 0
+        year = 0
+        prevYear = 0
+        prevValue = [0.0]*5
+        prevAvail = [False]*5
+        prevEligible = False
+        available = [False]*5
+        value = [0.0]*5
+        meetThreshold = [False]*5
+        change = [0.0]*5
+        threshold = -0.01
+    
+        titles = [""]*26
+    
+        for line in csv_reader :
+        
+            eligible = True
+        
+            if lineNum == 1 :               
+                
+                print( " " )
+                ##print( lineNum, "(39:  First line title setting" )
+                
+                """
+                0 :  COWcode        1 :  year            2 :  country_name   3 :  country_text_id   
+                4 :  country_id     5 :  v2x_polyarchy   6 :  v2x_libdem     7 :  v2x_partipdem   
+                8 :  v2x_delibdem   9 :  v2x_egaldem   
+                """
+                temp = [""]*5
+                titles[0] = line[0]
+                titles[1] = line[1]
+                titles[2] = "Eligible?"
+                titles[3] = line[2]
+                titles[4] = line[3]
+                titles[5] = line[4]
+                titles[6] = line[5]
+                titles[7] = line[5] + " available?"
+                titles[8] = line[5] + " change"
+                titles[9] = line[5] + " threshold?"
+                titles[10] = line[6] 
+                titles[11] = line[6] + " available?"
+                titles[12] = line[6] + " change"
+                titles[13] = line[6] + " threshold?"
+                titles[14] = line[7]
+                titles[15] = line[7] + " available?"
+                titles[16] = line[7] + " change"
+                titles[17] = line[7] + " threshold?"
+                titles[18] = line[8]
+                titles[19] = line[8] + " available?"
+                titles[20] = line[8] + " change"
+                titles[21] = line[8] + " threshold?"
+                titles[22] = line[9]
+                titles[23] = line[9] + " available?"
+                titles[24] = line[9] + " change" 
+                titles[25] = line[9] + " threshold?"
+                
+                titles[5] = line[4]
+                outputFile.writerow( titles )
+                
+            else :
+                
+                cow = int(line[0])
+                year = int(line[1])
+                output = [""]*26
+                ##print( lineNum, "(82): Setting COW code and Year :  COW =", cow, " Year =", year )
+                
+                """
+                 0 :  COW Code   1 :  Year   2 :  Eligible?   3 :  country_name   4 :  country_text_id   5 :  country_id                  
+                 6 :  v2x_polyarchy     7 :  v2x_polyarchy available?    8 :  v2x_polyarchy change        9 :  v2x_polyarchy threshold?   
+                 10 :  v2x_libdem      11 :  v2x_libdem available?      12 :  v2x_libdem change          13 :  v2x_libdem threshold?      
+                 14 :  v2x_partipdem   15 :  v2x_partipdem available?   16 :  v2x_partipdem change       17 :  v2x_partipdem threshold?   
+                 18 :  v2x_delibdem    19 :  v2x_delibdem available?    20 :  v2x_delibdem change        21 :  v2x_delibdem threshold?    
+                 22 :  v2x_egaldem     23 :  v2x_egaldem available?     24 :  v2x_egaldem change         25 :  v2x_egaldem threshold?
+                """
+                
+                output[0] = str( cow )
+                output[1] = str( year ) 
+                
+                if line[5] != '':
+                    available[0] = True
+                    value[0] = round(float(line[5]), 3)
+                else :
+                    available[0] = False
+                    output[6] = "NA"
+                if line[6] != '':
+                    available[1] = True
+                    value[1] = round(float(line[6]), 3)
+                else :
+                    available[1] = False
+                    output[10] = "NA"
+                if line[7] != '':
+                    available[2] = True
+                    value[2] = round(float(line[7]), 3)
+                else :
+                    available[2] = False
+                    output[14] = "NA"
+                if line[8] != '':
+                    available[3] = True
+                    value[3] = round(float(line[8]), 3)
+                else :
+                    available[3] = False
+                    output[18] = "NA"
+                if line[9] != '':
+                    available[4] = True
+                    value[4] = round(float(line[9]), 3)
+                else :
+                    available[4] = False
+                    output[22] = "NA"
+            
+                ## Is new Country?
+                if prevCOW == cow :
+                    ##print( lineNum, "(98):  A :  Previous COW code matches current COW code" )
+                    
+                    ## Is continuous w/ Previous Year?
+                    if prevYear+1 == year :
+                        ##print( lineNum, "(102):  AC :  Year is Continuous, entering loop:" )
+                            
+                        ## For Each Indicator :
+                        for i in range(5) :
+                            
+                            if available[i] :
+                            
+                                output[ 7 + 4*i ] = str( available[i] )
+                                print( lineNum, "(120): ", available )
+                                ##print( lineNum, ":  AC", i, "F :  Indicator", i, ":  Is available, testing if previous year is available")
+                                    
+                                ## Is previous Year's value available?
+                                if prevAvail[i] :
+                                    ##print( lineNum, ":  AC", i, "FG :  Indicator", i, ":  Previous year is available, recording indicator value" )
+                                    
+                                    ## Calculate Change
+                                    available[i] = True
+                                    value[i] = round( float(line[i+5]), 3 )
+                                    d = value[i] - prevValue[i]
+                                    change[i] = round( d, 3 )
+                                    output[ 6 + 4*i ] = str( value[i] )
+                                    output[ 8 + 4*i ] = str( change[i] )
+                                    ##print( lineNum, ":  AC", i, "FG :  Indicator", i, ":  Read as : ", line[i+5], " Recorded as : ", value[i], " Stored in Output as : ", output[ 6 + 4*i ] )
+                                    ##print( lineNum, ":  AC", i, "FG :  Indicator", i, ":  Change Calculated as : ", d, " Recorded as : ", change[i], " Stored in Output as : ", output[ 8 + 4*i ] )
+                                    
+                                    ## Is change <-0.01 ?
+                                    if change[i] <= threshold :
+                                        ## print( lineNum, ":  AC", i, "FGJ :  Indicator", i, ":  Change meets threshold" )
+                                        meetThreshold[i] = True
+                                        available[i] = True
+                                        print( lineNum, "(140): ", available )
+                                
+                                else :
+                                    ## Mark as N/A?
+                                    ##print( lineNum, ":  AC", i, "FH :  Indicator", i, ":  Previous year's value is not available, marking as unavailable" )
+                                    ##available[i] = False
+                                    output[ 7 + 4*i ] = str( available[i] )
+                                    print( lineNum, "(147): ", available )
+                    
+                    else :
+                        
+                        ## Mark as Ineligible
+                        ##print( lineNum, ":  AD :  Year is not continuous with previous year, marking as ineligible" )  ## Do I ever fucking use this? 
+                        eligible = False
+                        output[2] = str( eligible )
+                        for i in range(5) :
+                            available[i] = False
+                        print( lineNum, "(157): ", available )
+                  
+                else :
+                    
+                    ## Reset Values and Trackers, Mark as ineligible
+                    ##print( lineNum, ":  B :  New country, marking as ineligible" )
+                    eligible = False
+                    output[2] = str( eligible )
+                    for i in range(5) :
+                        available[i] = False
+                    print( lineNum, "(167): ", available )
+                        
+                """
+                Current theory is that this reset not saving the values in previous value is the problem
+                """
+                ##print( lineNum, ": Setting final output" )
+                print( lineNum, "(173): ", available )
+                ## Make Sure all of the Output values are correct
+                output[0] =   str( cow )                    ## COW Code
+                output[1] =   str( year )                   ## Year
+                output[2] =   str( eligible )               ## Eligible?
+                output[3] =   line[2]                       ## Country Name
+                output[4] =   line[3]                       ## Country Text ID
+                output[5] =   line[4]                       ## Country ID
+                output[6] =   str( value[0] )               ## polyarchy
+                output[7] =   str( available[0] )           ## polyarchy available
+                output[8] =   str( change[0] )              ## polyarchy change
+                output[9] =   str( meetThreshold[0] )       ## polyarchy threshold
+                output[10] =  str( value[1] )               ## libdem
+                output[11] =  str( available[1] )           ## libdem available
+                output[12] =  str( change[1] )              ## libdem change
+                output[13] =  str( meetThreshold[1] )       ## libdem threshold
+                output[14] =  str( value[2] )               ## partipdem
+                output[15] =  str( available[2] )           ## partipdem available
+                output[16] =  str( change[2] )              ## partipdem change
+                output[17] =  str( meetThreshold[2] )       ## partipdem threshold
+                output[18] =  str( value[3] )               ## delibdem
+                output[19] =  str( available[3] )           ## delibdem available
+                output[20] =  str( change[3] )              ## delibdem change
+                output[21] =  str( meetThreshold[3] )       ## delibdem threshold
+                output[22] =  str( value[4] )               ## egaldem
+                output[23] =  str( available[4] )           ## egaldem available
+                output[24] =  str( change[4] )              ## egaldem change
+                output[25] =  str( meetThreshold[4] )       ## egaldem threshold
+                
+                print( lineNum, "(202): ", available )
+                
+                ## Print Final Output
+                
+                outputFile.writerow( output )
+                
+            ##print( lineNum, "(208): Resetting Values" )
+            for i in range(5) :
+                prevAvail[i] = available[i]
+                prevValue[i] = value[i]
+                available[i] = False
+                value[i] = 0.0
+                meetThreshold[i] = False
+                change[i] = 0.0
+            prevCOW = cow
+            prevYear = year
+            prevEligible = eligible
+            lineNum += 1
