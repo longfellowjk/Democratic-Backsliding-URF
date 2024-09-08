@@ -5,227 +5,547 @@ Created on Wed Aug 14 17:29:37 2024
 @author: longf
 """
 
-## Initiate Global Variables
-    ## Line Variables
-threshold = [ False ]*5
-value = [ 0.0 ]*5
-change = [ 0.0 ]*5
-cow = 0
-year = 0
-anyThreshold = False
-newCountry = False
-nonContinuousYear = False
-prevYear = 0
-prevCow = 0
-print( "!!! COW:", cow, "Year:", year, "prevCOW:", prevCow, "prevYear:", prevYear )
-
-    ## Period Variables
-currentPeriod = False
-reset = False
-resetTimer = 0
-periodCount = 0
-periodTimer = 0
-periodStartYear = 0
-periodEndYear = 0
-periodStartValue = [ 0.0 ]*5
-periodEndValue = [ 0.0 ]*5
-periodChange = [ 0.0 ]*5
-
 import csv
-with open ( 'C:/Users/longf/V-Dem Change Calculation.csv', 'r' ) as csv_file:
-    with open( 'V-Dem Backsliding(2).csv', 'w' ) as s :
+with open ( 'C:/Users/longf/Desktop/School Work/Undergraduate Research Fellowship/Data Analysis/V-Dem Dataset (CSV).csv', 'r' ) as csv_file:
+    with open( 'V-Dem Backsliding(3).csv', 'w' ) as s :
         
         inputFile = csv.reader(csv_file, delimiter=',')
         outputFile = csv.writer(s)
         csv_reader = csv.reader(csv_file, delimiter=',')
         
         ## Print Header
-        output = [""]*20
+        output = [""]*22
         output[ 0 ] = "COW Code"
         output[ 1 ] = "Period #"
         output[ 2 ] = "Starting Year"
         output[ 3 ] = "Ending Year"
-        output[ 4 ] = "Total Years"
-        
+        output[ 4 ] = "Duration"
         output[ 5 ] = "Polyarchy (Start)"
         output[ 6 ] = "Polyarchy (End)"
         output[ 7 ] = "Polyarchy (Cumulative Change)"
-        
         output[ 8 ] = "LibDem (Start)"
         output[ 9 ] = "LibDem (End)"
         output[ 10 ] = "LibDem (Cumulative Change)"
-        
         output[ 11 ] = "PartipDem (Start)"
         output[ 12 ] = "PartipDem (End)"
         output[ 13 ] = "PartipDem (Cumulative Change)"
-        
         output[ 14 ] = "DelibDem (Start)"
         output[ 15 ] = "DelibDem (End)"
         output[ 16 ] = "DelibDem (Cumulative Change)"
-        
         output[ 17 ] = "EgalDem (Start)"
         output[ 18 ] = "EgalDem (End)"
         output[ 19 ] = "EgalDem (Cumulative Change)"
-        
+        output[ 20 ] = "Country ID"
+        output[ 21 ] = "Country Name"
         outputFile.writerow( output )
         next( inputFile )
         
+        outputs = 0
+        totalPeriods = 0
         
+        ## Initialize Variables
+        cow = [ 0 ]*2   ## 0: Current Line   1: Previous Line
+        year = [ 0 ]*2   ## 0: Current Line   1: Previous Line
+        threshold = -0.01
+        values = [0.0]*5
+        """ Values Index: 
+        x
+        0 :  Polyarchy
+        1 :  LibDem
+        2 :  PartipDem
+        3 :  DelibDem
+        4 :  Egaldem
         
-        ## Define Functions
-            ## Read in Data
-        def dataRead() :
-            
-            print( "77: dataRead :", line[0], line[1])
-            
-            cow = line[ 0 ]
-            year = line[ 1 ]
-            
-            for i in range( 5 ) :
-                a = 4 * i
-                x = 6 + a
-                y = 8 + a
-                z = 9 + a
-                change[i] = round(float(line[y]), 3)
-                value[i] = round(float(line[x]), 3)
-                if line[z] == "TRUE" :
-                    threshold[i] = True
-                    anyThreshold = True
-                else :
-                    threshold[i] = False
-            
-            if prevCow != cow :
-                print( "96: dataRead :", "COW:", cow, "Year:", year, "prevCOW:", prevCow, "prevYear:", prevYear )
-                newCountryProtocol()
-            
-            if year != prevYear + 1 :
-                print( "100: dataRead :", "COW:", cow, "Year:", year, "prevCOW:", prevCow, "prevYear:", prevYear)
-                nonContinuousYearProtocol()
-            
-            ## Start Period
-        def startPeriod() :
-            print( "103: startPeriod" )
-            """currentPeriod = True
-            periodCount += 1
-            periodTimer = 5
-            periodStartYear = year
-            reset = False
-            resetTimer = 3
-            for i in range( 5 ) :
-                periodStartValue[i] = value[i]"""
-            
-            ## End Period
-        def endPeriod() : 
-            print( "115: endPeriod" )
-            """
-            periodEndYear = year
-            for i in range( 5 ) :
-                periodEndValue[i] = value[i]
-            outputPrinting()
-            currentPeriod = False
-            periodTimer = 0
-            reset = False
-            resetTimer = 0
-            periodStartYear = 0
-            periodEndYear = 0
-            periodStartValue = [ 0.0 ]*5
-            periodEndValue = [ 0.0 ]*5
-            periodChange = [ 0.0 ]*5"""
-            
-            ## New Country Protocol
-        def newCountryProtocol() :
-            print( "133: newCountryProtocol", "COW:", cow, "Year:", year, "prevCOW:", prevCow, "prevYear:", prevYear )
-            newCountry = True
-            periodCount = 0
-            
-            if currentPeriod is True :
-                endPeriod()
-            
-            ## Non-Continuous Year Protocol
-        def nonContinuousYearProtocol() :
-            print( "142: nonContinuousYearProtocol", "COW:", cow, "Year:", year, "prevCOW:", prevCow, "prevYear:", prevYear )
-            """nonContinuousYear = True"""
-            
-            ## Reset Protocol
-        def resetProtocol() :
-            print( "147: resetProtocol" )
-            """if resetTimer > 0 : 
-                resetTimer -= 1
-            
-            if (anyThreshold is True) and (reset is False) and (resetTimer == 0) :
-                
-                reset = True
-                periodTimer = 6"""
-            
-            ## Period Operating Protocol
-        def periodOperatingProtocol () :
-            
-            print( "158: periodOperatingProtocol" )
-            """
-            resetProtocol()
-            
-            flag = False
-            for i in range(5):
-                periodChange[i] += change[i]
-                if periodChange[i] < 0 :
-                    flag = True
-            
-            if flag is False :
-                endPeriod()
-            
-            if periodTimer == 1 :
-                endPeriod()
-            else :
-                periodTimer -= 1"""
-            
-            ## Output Printing
-        def outputPrinting() :
-            
-            print( "179: outputPrinting" )
-            """
-            output[ 0 ] = cow                                       ##COW Code
-            output[ 1 ] = periodCount                               ##Period #
-            output[ 2 ] = periodStartYear                           ##Starting Year
-            output[ 3 ] = periodEndYear                             ##Ending Year
-            output[ 4 ] = ( periodEndYear - periodStartYear )       ##Total Years
-            output[ 5 ] = periodStartValue[0]                       ##Polyarchy (Start)
-            output[ 6 ] = periodEndYear[0]                          ##Polyarchy (End)
-            output[ 7 ] = periodChange[0]                           ##Polyarchy (Cumulative Change)
-            output[ 8 ] = periodStartValue[1]                       ##LibDem (Start)
-            output[ 9 ] = periodEndValue[1]                         ##LibDem (End)
-            output[ 10 ] = periodChange[1]                          ##LibDem (Cumulative Change)
-            output[ 11 ] = periodStartValue[2]                      ##PartipDem (Start)
-            output[ 12 ] = periodEndValue[2]                        ##PartipDem (End)
-            output[ 13 ] = periodChange[2]                          ##PartipDem (Cumulative Change)
-            output[ 14 ] = periodStartValue[3]                      ##DelibDem (Start)
-            output[ 15 ] = periodEndValue[3]                        ##DelibDem (End)
-            output[ 16 ] = periodChange[3]                          ##DelibDem (Cumulative Change)
-            output[ 17 ] = periodStartValue[4]                      ##EgalDem (Start)
-            output[ 18 ] = periodEndValue[4]                        ##EgalDem (End)
-            output[ 19 ] = periodChange[4]                          ##EgalDem (Cumulative Change)
-            print( "Output :", output )
-            """
-            ## New Period Detection Protocol
-        def newPeriodDetection() :
-            
-            print( "206: newPeriodDetection" )
-            """if anyThreshold is True :
-                
-                startPeriod()"""
-            
+        FORMAT :  values[x]
+        
+        """
+        prevValues = [0.0]*5
+        """ prevValues Index: 
+        x
+        0 :  Polyarchy
+        1 :  LibDem
+        2 :  PartipDem
+        3 :  DelibDem
+        4 :  Egaldem
+        
+        FORMAT :  values[x]
+        
+        """
+        names = [""]*2   ## 0: Country ID   1: Country Name
+        period = [ 0 ] * 6
+        """ Period Index: 
+        x
+        0 :  Period Number
+        1 :  Start Year
+        2 :  End Year
+        3 :  Duration
+        4 :  Triggering Value
+        5 :  Timer
+        
+        """
+        periodValues = [[ 0.0 ]*3]*5
+        """ periodValues Index: 
+        x
+        0 :  Start
+        1 :  Change
+        2 :  End
+        
+        y
+        0 :  Polyarchy
+        1 :  LibDem
+        2 :  PartipDem
+        3 :  DelibDem
+        4 :  EgalDem
+        
+        FORMAT :  available[y][x]
+        
+        """
+        available = [[False]*5]*3
+        """ Available Index: 
+        x
+        0 :  Polyarchy
+        1 :  LibDem
+        2 :  PartipDem
+        3 :  DelibDem
+        4 :  EgalDem
+        
+        y
+        0 :  Current Line
+        1 :  Previous Line
+        2 :  Change Available
+        
+        FORMAT :  available[y][x]
+        
+        """
+        change = [0.0]*5
+        """ Change Index: 
+        x
+        0 :  Polyarchy
+        1 :  LibDem
+        2 :  PartipDem
+        3 :  DelibDem
+        4 :  EgalDem
+        
+        """
+        case = [[False]*2]*2
+        """ Available Index: 
+        x
+        0 :  Negative
+        1 :  Positive
+        
+        y
+        0 :  Below Threshold
+        1 :  Above Threshold
+        
+        FORMAT :  available[y][x]
+        
+        """
+        counters = [ 0 ]*6
+        countryPeriods = [0]*250
+        countries = 0
+        newCountry = False
+        nonConYear = False
+        currentPeriod = False
+        negativeChange = [False]*5
+        positiveChange = [False]*5
+        meetThreshold = [False]*5
+        anyThreshold = False
+        aid = [ "" ]*5
+        aid[0] = "Polyarchy"
+        aid[1] = "LibDem"
+        aid[2] = "PartipDem"
+        aid[3] = "DelibDem"
+        aid[4] = "EgalDem"
         
         for line in csv_reader :
             
-            dataRead()
+            print( "--------------------" )
             
+            ## Set COW and Year Values
+            cow[0] = int( line[0] )
+            year[0] = int( line[1] )
+            
+            ## Save Country Names
+            names[1] = line[2]
+            names[0] = line[3]
+            ##print( "COW:", cow, " Year:", year, " Names:", names )
+            
+            if cow[0] != cow[1] :
+                newCountry = True
+                countryPeriods[ countries ] = period[0]
+                countries += 1
+                if currentPeriod is True :
+                    if period[3] > 1 :
+                        print( "Ending Period (", cow[0], "/", year[0], ") #", period[0], ": New Country Detected" )
+                        currentPeriod = False
+                        period[2] = year[1]
+                        for i in range( 5 ) :
+                            periodValues[i][2] = prevValues[i] 
+                        output[ 3 ] = period[2]  ## Ending Year
+                        output[ 4 ] = period[3]  ## Duration
+                        output[ 6 ] = periodValues[0][2]  ## Polyarchy (End)
+                        output[ 7 ] = periodValues[0][1]  ## Polyarchy (Cumulative Change)
+                        output[ 9 ] = periodValues[1][2]  ## LibDem (End)
+                        output[ 10 ] = periodValues[1][1]  ## LibDem (Cumulative Change)
+                        output[ 12 ] = periodValues[2][2]  ## PartipDem (End)
+                        output[ 13 ] = periodValues[2][1]  ## PartipDem (Cumulative Change)
+                        output[ 15 ] = periodValues[3][2]  ## DelibDem (End)
+                        output[ 16 ] = periodValues[3][1]  ## DelibDem (Cumulative Change)
+                        output[ 18 ] = periodValues[4][2]  ## EgalDem (End)
+                        output[ 19 ] = periodValues[4][1]  ## EgalDem (Cumulative Change)
+                        outputFile.writerow( output )
+                        ##print( "OUTPUT (1) : ", output )
+                        counters[0] += 1
+                        counters[1] += 1
+                    for i in range( 20 ) :
+                        output[i] = ""
+                    for i in range( 6 ) :
+                        period[i] = 0
+                period[0] = 0
+            if year[0] != year[1] + 1 :
+                nonConYear = True
+            
+            for i in range( 5 ) :
+                
+                ##print( aid[i], "Test Commencing" )
+                
+                ## Saving Values
+                x = 5 + i
+                if line[x] == '':
+                    available[0][i] = False
+                    ##print( "Setting", aid[i], "Available value to FALSE" )
+                else :
+                    t = prevValues[i]
+                    values[i] = float( line[x] )
+                    available[0][i] = True
+                    
+                    if t != prevValues[i] :
+                        print( "ERROR ERROR ERROR" )
+                    
+                    ##print( "Setting", aid[i], "Available value to TRUE" )
+                    
+                ## New Country Protocol
+                if newCountry is True :
+                    available[0][i] = False
+                    ##print( "Setting", aid[i], "Available value to FALSE" )
+                
+                if nonConYear is True :
+                    available[0][i] = False
+                    ##print( "Setting", aid[i], "Available value to FALSE" )
+                
+                ## Calculate Changes
+                if available[0][i] and available[1][i] :
+                    
+                    change[i] = values[i] - prevValues[i]  
+                    available[2][i] = True
+                    ##print(  aid[i], "change value =", change[i], "[", values[i], "-", prevValues[i], "]" )
+                    
+                    if change[i] < -0.005 :
+                        
+                        negativeChange[i] = True
+                        positiveChange[i] = False
+                        ##print(  aid[i], "change is NEGATIVE" )
+                        
+                        if change[i] < threshold : 
+                            
+                            meetThreshold[i] = True
+                            anyThreshold = True
+                            case[0][1] = True
+                            print(  "(", cow[0], "/", year[0], "/", aid[i], ") CASE[0][1] = TRUE  ( - / 1 )" )
+                        else :
+                            case[0][0] = True
+                            print( "(", cow[0], "/", year[0], "/", aid[i], ") CASE[0][0] = TRUE  ( - / 0 )" )
+                        
+                    elif change[i] > 0.005 : 
+                        
+                        negativeChange[i] = False
+                        positiveChange[i] = True
+                        ##print(  aid[i], "change is positive" )
+                        
+                        if change[i] > ( threshold * -1 ) : 
+                            
+                            meetThreshold[i] = True
+                            case[1][1] = True
+                            print( "(", cow[0], "/", year[0], "/", aid[i], ") CASE[1][1] = TRUE  ( + / 1 )" )
+                        else :
+                            case[1][0] = True
+                            print( "(", cow[0], "/", year[0], "/", aid[i], ") CASE[1][0] = TRUE  ( + / 0 )" )
+                            
+                    else : 
+                        
+                        negativeChange[i] = False
+                        positiveChange[i] = False
+                        ##print(  aid[i], "change is neutral" )
+                    
+                else : 
+                    
+                    available[2][i] = False
+                    ##print( aid[i], "change value is NOT available" )
+            
+            print( "CASE :  [ Negative: [ (0)", case[0][0], ", (1)", case[0][1], "], Positive: [ (0)", case[1][0], ", (1)", case[1][1], "] ]" )
+            
+            ##print( "New Country?", newCountry, "Non-Continuous Year?", nonConYear )
+            ##print( "Values:", values, "Available:", available )
+            ##print( "--- STARTING PERIOD ALGORITHM ---" )
+            
+            ## Period Algorithm
             if currentPeriod is True :
                 
-                periodOperatingProtocol()
+                ##print( "Period is ACTIVE" )
+                period[3] += 1   ## Iterating Duration
                 
-            else : 
+                if period[5] == 1 :
+                    
+                    print( "Case 1" )
+                    
+                    for i in range( 5 ) :
+                        periodValues[i][1] += change[i]
+                        periodValues[i][2] = values[i] 
+                    if period[3] > 0 :
+                        print( "Ending Period (", cow[0], "/", year[0], ") #", period[0], ": Period Timer is Over" )
+                        currentPeriod = False
+                        period[2] = year[1]
+                        
+                        output[ 3 ] = period[2]  ## Ending Year
+                        output[ 4 ] = period[3]  ## Duration
+                        output[ 6 ] = periodValues[0][2]  ## Polyarchy (End)
+                        output[ 7 ] = periodValues[0][1]  ## Polyarchy (Cumulative Change)
+                        output[ 9 ] = periodValues[1][2]  ## LibDem (End)
+                        output[ 10 ] = periodValues[1][1]  ## LibDem (Cumulative Change)
+                        output[ 12 ] = periodValues[2][2]  ## PartipDem (End)
+                        output[ 13 ] = periodValues[2][1]  ## PartipDem (Cumulative Change)
+                        output[ 15 ] = periodValues[3][2]  ## DelibDem (End)
+                        output[ 16 ] = periodValues[3][1]  ## DelibDem (Cumulative Change)
+                        output[ 18 ] = periodValues[4][2]  ## EgalDem (End)
+                        output[ 19 ] = periodValues[4][1]  ## EgalDem (Cumulative Change)
+                        output[20] = names[0]
+                        output[21] = names[1]
+                        outputFile.writerow( output )
+                        ##print( "OUTPUT (2) : ", output )
+                        counters[0] += 1
+                        counters[2] += 1
+                        for i in range( 5 ) :
+                            x = 1 + i
+                            period[x] = 0
+                    for i in range( 20 ) :
+                        output[i] = ""
+                    
                 
-                newPeriodDetection()
+                elif case[0][1] is True :
+                    
+                    print( "Case 3" )
+                    
+                    print( "(", cow[0], "/", year[0], ") #", period[0], ":  Resetting Period Timer" )
+                    period[5] = 5
+                    counters[5] += 1
+                    for i in range( 5 ) :
+                        periodValues[i][1] += change[i]
+                        
+                elif case[1][0] is True :
+                    
+                    print( "Case 4" )
+                    
+                    if period[5] > 2 :
+                        period[5] -= 2
+                    else :
+                        for i in range( 5 ) :
+                            periodValues[i][1] += change[i]
+                            periodValues[i][2] = values[i] 
+                        
+                        print( "Ending Period (", cow[0], "/", year[0], ") #", period[0], ": Period Timer is Over, Type 2" )
+                        currentPeriod = False
+                        period[2] = year[1]
+                            
+                        output[ 3 ] = period[2]  ## Ending Year
+                        output[ 4 ] = period[3]  ## Duration
+                        output[ 6 ] = periodValues[0][2]  ## Polyarchy (End)
+                        output[ 7 ] = periodValues[0][1]  ## Polyarchy (Cumulative Change)
+                        output[ 9 ] = periodValues[1][2]  ## LibDem (End)
+                        output[ 10 ] = periodValues[1][1]  ## LibDem (Cumulative Change)
+                        output[ 12 ] = periodValues[2][2]  ## PartipDem (End)
+                        output[ 13 ] = periodValues[2][1]  ## PartipDem (Cumulative Change)
+                        output[ 15 ] = periodValues[3][2]  ## DelibDem (End)
+                        output[ 16 ] = periodValues[3][1]  ## DelibDem (Cumulative Change)
+                        output[ 18 ] = periodValues[4][2]  ## EgalDem (End)
+                        output[ 19 ] = periodValues[4][1]  ## EgalDem (Cumulative Change)
+                        outputFile.writerow( output )
+                        ##print( "OUTPUT (2) : ", output )
+                        counters[0] += 1
+                        counters[5] += 1
+                        for i in range( 20 ) :
+                            output[i] = ""
+                        for i in range( 5 ) :
+                            x = 1 + i
+                            period[x] = 0
+                
+                else :
+                    
+                    print( "Case 5" )
+                    
+                    period[5] -= 1
+                    print( "(", cow[0], "/", year[0], ") #", period[0], ": Deiterating Period Timer =", period[5] )
+                
+            else :
+                
+                ##print( "Period is INACTIVE" )
+                
+                if case[0][1] is True :
+                    
+                    ##print( "Some threshold is met" )
+                    periodTrigger = False
+                    for i in range( 5 ) :
+                        if negativeChange[i] is True :
+                            if meetThreshold[i] is True : 
+                                periodTrigger = True
+                                period[4] = i
+                                ##print( "Period Trigger Identified : ", aid[i] )
+                    if periodTrigger is True :
+                        
+                        currentPeriod = True
+                        totalPeriods += 1
+                        period[0] += 1
+                        period[1] = year[0]
+                        period[3] = 1
+                        period[5] = 5
+                        output[ 0 ] = cow[0]  ## COW Code
+                        output[ 1 ] = period[0]  ## Period #
+                        output[ 2 ] = period[1]  ## Starting Year
+                        output[ 5 ] = periodValues[0][0]  ## Polyarchy (Start)
+                        output[ 8 ] = periodValues[1][0]  ## LibDem (Start)
+                        output[ 11 ] = periodValues[2][0]  ## PartipDem (Start)
+                        output[ 14 ] = periodValues[3][0]  ## DelibDem (Start)
+                        output[ 17 ] = periodValues[4][0]  ## EgalDem (Start)
+                        for i in range( 5 ) :
+                            periodValues[i][0] = values[i]
+                            periodValues[i][1] = change[i]
+                        print( "STARTING PERIOD (", cow[0], "/", year[0], ") #", period[0] )
+                            
             
-            prevYear = year
-            prevCow = cow
-            ##print( "COW:", cow, "Year:", year, "prevCOW:", prevCow, "prevYear:", prevYear )
+            ## Set Previous Line Values
+            cow[1] = cow[0]
+            year[1] = year[0]
+            newCountry = False
+            nonConYear = False
+            anyThreshold = False
+            for x in range( 2 ) :
+                for y in range( 2 ) :
+                    case[x][y] = False
+            print( case )
+            for i in range( 5 ) :
+                available[1][i] = available[0][i]
+                prevValues[i] = values[i]
+                available[2][i] = False
+                negativeChange[i] = False
+                positiveChange[i] = False
+                meetThreshold[i] = False
+        
+        if currentPeriod is True :
+            if period[3] > 1 :
+                print( "Ending Period (", cow[0], "/", year[0], ") #", period[0], ": New Country Detected" )
+                currentPeriod = False
+                period[2] = year[1]
+                for i in range( 5 ) :
+                    periodValues[i][2] = prevValues[i] 
+                output[ 3 ] = period[2]  ## Ending Year
+                output[ 4 ] = period[3]  ## Duration
+                output[ 6 ] = periodValues[0][2]  ## Polyarchy (End)
+                output[ 7 ] = periodValues[0][1]  ## Polyarchy (Cumulative Change)
+                output[ 9 ] = periodValues[1][2]  ## LibDem (End)
+                output[ 10 ] = periodValues[1][1]  ## LibDem (Cumulative Change)
+                output[ 12 ] = periodValues[2][2]  ## PartipDem (End)
+                output[ 13 ] = periodValues[2][1]  ## PartipDem (Cumulative Change)
+                output[ 15 ] = periodValues[3][2]  ## DelibDem (End)
+                output[ 16 ] = periodValues[3][1]  ## DelibDem (Cumulative Change)
+                output[ 18 ] = periodValues[4][2]  ## EgalDem (End)
+                output[ 19 ] = periodValues[4][1]  ## EgalDem (Cumulative Change)
+                outputFile.writerow( output )
+                ##print( "OUTPUT (1) : ", output )
+                counters[0] += 1
+                counters[1] += 1
+            for i in range( 20 ) :
+                output[i] = ""
+            for i in range( 6 ) :
+                period[i] = 0
+        
+        a = 0
+        avg = 0.0
+        zeros = 0
+        for i in range( countries ) :
+            a += countryPeriods[ i ]
+            if countryPeriods[i] == 0 :
+                zeros += 1
+        avg = a / countries
+        
+        print( "---------------" )
+        print( "TOTAL OUTPUTS : ", counters[0] )
+        print( "     Type 1 :  New Country Detected      : ", counters[1] )
+        print( "     Type 2 :  Period Timer is Over      : ", counters[2] )
+        print( "     Type 3 :  Positive Threshold Cutoff : ", counters[3] )
+        print( "     Type 4 :  Period Timer is Over, Type 2  : ", counters[5] )
+        print( "TOTAL PERIODS : ", totalPeriods )
+        print( "     Reset of Period Timer : ", counters[4] )
+        print( "TOTAL COUNTRIES : ", countries )
+        print( "     Average Periods / Country : ", avg )
+        print( "     Countries w/ 0 Periods : ", zeros )
+        print( "---------------" )
+        
+"""
+elif case[1][1] is True :
+    
+    print( "Case 2" )
+    
+    test = False
+    if period[3] > 1 :
+        for i in range( 5 ) :
+            if ( positiveChange[i] and meetThreshold[i] ) :
+                if i == period[4] :
+                    test = True
+                    print( "Test TRUE through reversal test" )
+        a = 0
+        if case[0][1] is True :
+            a -= 5
+        if case[0][0] is True :
+            a -= 1
+        if case[1][0] is True :
+            a += 1
+        if case[1][1] is True :
+            a += 3
+        if a > 0 :
+            test = True
+            print( "Test TRUE through A test" )
+    
+    if test is True :
+        for i in range( 5 ) :
+            periodValues[i][2] = prevValues[i] 
+    
+        print( "Ending Period (", cow[0], "/", year[0], ") #", period[0], ": Positive Threshold Cutoff", change )
+        currentPeriod = False
+        period[2] = year[1]
+        
+        output[ 3 ] = period[2]  ## Ending Year
+        output[ 4 ] = period[3]  ## Duration
+        output[ 6 ] = periodValues[0][2]  ## Polyarchy (End)
+        output[ 7 ] = periodValues[0][1]  ## Polyarchy (Cumulative Change)
+        output[ 9 ] = periodValues[1][2]  ## LibDem (End)
+        output[ 10 ] = periodValues[1][1]  ## LibDem (Cumulative Change)
+        output[ 12 ] = periodValues[2][2]  ## PartipDem (End)
+        output[ 13 ] = periodValues[2][1]  ## PartipDem (Cumulative Change)
+        output[ 15 ] = periodValues[3][2]  ## DelibDem (End)
+        output[ 16 ] = periodValues[3][1]  ## DelibDem (Cumulative Change)
+        output[ 18 ] = periodValues[4][2]  ## EgalDem (End)
+        output[ 19 ] = periodValues[4][1]  ## EgalDem (Cumulative Change)
+        outputFile.writerow( output )
+        ##print( "OUTPUT (3) : ", output )
+        counters[0] += 1
+        counters[3] += 1
+        for i in range( 20 ) :
+            output[i] = ""
+        for i in range( 5 ) :
+            x = 1 + i
+            period[x] = 0
+    else :
+        print( "Case 5" )
+        
+        period[5] -= 1
+        print( "(", cow[0], "/", year[0], ") #", period[0], ": Deiterating Period Timer =", period[5] )
+"""
