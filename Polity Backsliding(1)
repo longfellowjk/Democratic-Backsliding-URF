@@ -1,0 +1,285 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Sep  7 17:38:22 2024
+
+@author: longf
+"""
+
+import csv
+with open ( 'C:/Users/longf/Desktop/School Work/Undergraduate Research Fellowship/Data Analysis/Polity 5 (Edited).csv', 'r' ) as csv_file:
+    with open( 'Polity Backsliding(1).csv', 'w' ) as s :
+        
+        inputFile = csv.reader(csv_file, delimiter=',')
+        outputFile = csv.writer(s)
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        
+        ## Initialize Variables
+        cow = [ 0 ]*2           ## 0 :  Current Line   1 :  Previous Line
+        year = [ 0 ]*2          ## 0 :  Current Line   1 :  Previous Line
+        values = [ 0 ]*6
+        """
+        0 :  Democracy
+        1 :  Autocracy
+        2 :  Polity
+        3 :  Polity2
+        4 :  Durable
+        5 :  Change
+        """
+        prevValues = [ 0 ]*3
+        period = [ 0 ]*10
+        """
+        0 :  Is Current Period?  0 No, 1 Yes
+        1 :  Period Number
+        2 :  Period Timer
+        3 :  Start Year
+        4 :  DEM( Start )
+        5 :  DEM( Change )
+        6 :  AUT( Start )
+        7 :  AUT( Change )
+        8 :  POL( Start )
+        9 :  POL( Change )
+        """
+        names = [ "" ]*2        ## 0 :  Alpha Code   1 :  Country Name
+        output = [ "" ]*16
+        """
+        0  :  COW Code
+        1  :  Period Number
+        2  :  Start Year
+        3  :  End Year
+        4  :  Duration
+        5  :  DEM( Start )
+        6  :  DEM( End )
+        7  :  DEM( Delta )
+        8  :  AUT( Start )
+        9  :  AUT( End )
+        10 :  AUT( Delta )
+        11 :  POL( Start )
+        12 :  POL( End )
+        13 :  POL( Delta )
+        14 :  Alpha Code
+        15 :  Country Name
+        """
+        
+        output[  0 ] = "COW Code"
+        output[  1 ] = "Period Number"
+        output[  2 ] = "Start Year"
+        output[  3 ] = "End Year"
+        output[  4 ] = "Duration"
+        output[  5 ] = "DEM( Start )"
+        output[  6 ] = "DEM( End )"
+        output[  7 ] = "DEM( Delta )"
+        output[  8 ] = "AUT( Start )"
+        output[  9 ] = "AUT( End )"
+        output[ 10 ] = "AUT( Delta )"
+        output[ 11 ] = "POL( Start )"
+        output[ 12 ] = "POL( End )"
+        output[ 13 ] = "POL( Delta )"
+        output[ 14 ] = "Alpha Code"
+        output[ 15 ] = "Country Name"
+        outputFile.writerow( output )
+        next( inputFile )
+        print( "Header Printed." )
+        
+        for line in csv_reader :
+            
+            
+            ## Country-Year ID
+            cow[0] = int( line[1] )
+            year[0] = int( line[4] )
+            
+            
+            ## Test if New Country
+            if cow[0] != cow[1] :
+                
+                ## New Country, End Current Period, Reset Periods
+                if period[0] == 1 :
+                    
+                    ##print( "New Country :  Ending Current Period" )
+                    duration = year[0] - period[3]
+                    if duration > 0 : 
+                        dem = values[0]
+                        aut = values[1]
+                        pol = values[2]
+                        demChange = dem - prevValues[0]
+                        autChange = aut - prevValues[1]
+                        polChange = pol - prevValues[2]
+                        demEnd = dem
+                        autEnd = aut
+                        polEnd = pol
+                        output[  0 ] = cow[0]   ## COW Code
+                        output[  1 ] = period[1]    ## Period Number
+                        output[  2 ] = period[3]    ## Start Year
+                        output[  3 ] = year[0]  ## End Year
+                        output[  4 ] = duration ## Duration
+                        output[  5 ] = period[4] ## DEM( Start )
+                        output[  6 ] = demEnd ## DEM( End )
+                        output[  7 ] = demChange ## DEM( Delta )
+                        output[  8 ] = period[6] ## AUT( Start )
+                        output[  9 ] = autEnd ## AUT( End )
+                        output[ 10 ] = autChange ## AUT( Delta )
+                        output[ 11 ] = period[8] ## POL( Start )
+                        output[ 12 ] = polEnd ## POL( End )
+                        output[ 13 ] = polChange ## POL( Delta )
+                        output[ 14 ] = names[0]     ## Alpha Code
+                        output[ 15 ] = names[1]     ## Country Name
+                        outputFile.writerow( output )
+                        print( "OUTPUT (1) : ", output )
+                
+                for i in range( 10 ) :
+                    
+                    period[i] = 0
+                
+                ##print( "New Country Detected, Values Reset" )
+            
+            
+            ## Names
+            names[0] = line[2]   ## Setting Alpha Code
+            names[1] = line[3]   ## Setting Country Name
+            
+            output[13] = names[0]   ## Setting Output for Alpha Code
+            output[14] = names[1]   ## Setting Output for Country Code
+            
+            ##print( "Names Saved : ", names )
+            
+            
+            ## Values
+            for i in range( 6 ) :
+                
+                x = i + 5
+                if line[x] != "" :
+                    a = int( line[x] )
+                    if ( a == -66 ) or ( a == -77 ) or ( a == -88 ) :
+                        if i == 5 : 
+                            values[i] = 0
+                        elif i < 2 :
+                            values[i] = prevValues[i]
+                    else :
+                        values[i] = a
+                else : 
+                    values[i] = 0
+                
+            ##print( "Values Saved : ", values )
+            
+                        
+            ## Test if Current Period is Active
+            if period[0] == 1 :
+                
+                ## Change Calculations
+                dem = values[0]
+                aut = values[1]
+                pol = values[2]
+                demChange = dem - prevValues[0]
+                autChange = aut - prevValues[1]
+                polChange = pol - prevValues[2]
+                
+                ## Current Period is Active, is Change Negative or Positive?
+               ## print( "Current Period ACTIVE :  Testing Change Situation" )
+                if values[5] > 0 : 
+                    
+                    ## Change is Positive, End Period
+                    ##print( "Change is Positive :  ENDING PERIOD" )
+                    """
+                    Need to consider changing this to giving data from previous line
+                    """
+                    duration = year[0] - period[3]
+                    if duration > 0 : 
+                        demEnd = dem
+                        autEnd = aut
+                        polEnd = pol
+                        output[  0 ] = cow[0]   ## COW Code
+                        output[  1 ] = period[1]    ## Period Number
+                        output[  2 ] = period[3]    ## Start Year
+                        output[  3 ] = year[0]  ## End Year
+                        output[  4 ] = duration ## Duration
+                        output[  5 ] = period[4] ## DEM( Start )
+                        output[  6 ] = demEnd ## DEM( End )
+                        output[  7 ] = demChange ## DEM( Delta )
+                        output[  8 ] = period[6] ## AUT( Start )
+                        output[  9 ] = autEnd ## AUT( End )
+                        output[ 10 ] = autChange ## AUT( Delta )
+                        output[ 11 ] = period[8] ## POL( Start )
+                        output[ 12 ] = polEnd ## POL( End )
+                        output[ 13 ] = polChange ## POL( Delta )
+                        output[ 14 ] = names[0]     ## Alpha Code
+                        output[ 15 ] = names[1]     ## Country Name
+                        outputFile.writerow( output )
+                        print( "OUTPUT (2) : ", output )
+                    for i in range(10) :
+                        if i != 1 :
+                            period[i] = 0
+                    
+                elif values[5] < 0 :
+                    
+                    ## Change is Negative, Reset Timer
+                    ##print( "Change is Negative :  Reset Timer" )
+                    
+                    period[2] = 5
+                    
+                elif values[5] == 0 : 
+                    
+                    ## Change is 0, Test if Period is over
+                    ##print( "Change is 0 :  Test if Period is Over" )
+                    if period[2] == 1 : 
+                        
+                        ## Period is Over, End Period
+                        ##print( "Period is Over :  ENDING PERIOD" )
+                        duration = year[0] - period[3]
+                        if duration > 0 : 
+                            demEnd = dem
+                            autEnd = aut
+                            polEnd = pol
+                            output[  0 ] = cow[0]   ## COW Code
+                            output[  1 ] = period[1]    ## Period Number
+                            output[  2 ] = period[3]    ## Start Year
+                            output[  3 ] = year[0]  ## End Year
+                            output[  4 ] = duration ## Duration
+                            output[  5 ] = period[4] ## DEM( Start )
+                            output[  6 ] = demEnd ## DEM( End )
+                            output[  7 ] = demChange ## DEM( Delta )
+                            output[  8 ] = period[6] ## AUT( Start )
+                            output[  9 ] = autEnd ## AUT( End )
+                            output[ 10 ] = autChange ## AUT( Delta )
+                            output[ 11 ] = period[8] ## POL( Start )
+                            output[ 12 ] = polEnd ## POL( End )
+                            output[ 13 ] = polChange ## POL( Delta )
+                            output[ 14 ] = names[0]     ## Alpha Code
+                            output[ 15 ] = names[1]     ## Country Name
+                            outputFile.writerow( output )
+                            print( "OUTPUT (3) : ", output )
+                        
+                        for i in range(10) :
+                            if i != 1 :
+                                period[i] = 0
+                    
+                    else : 
+                        
+                        ## Period is Not Over, Deiterating Counter
+                        a = period[2]
+                        period[2] -= 1
+                        ##print( "Period is not over, Deiterating Period Timer :  period[2] =", a, "- 1 =", period[2] )
+                    
+                else : 
+                    
+                    print( "ERROR :  Unknown situation, Line 157" )
+                
+            else :  
+                
+                ## Current Period is Inactive
+                ##print( "Current Period INACTIVE :  Testing Start of New Period" )
+                if values[5] < 0 :
+                    
+                    ## Start New Period
+                    period[0] = 1                   ## Current Period
+                    period[1] += 1                  ## Period Number
+                    period[2] = 5                   ## Period Timer
+                    period[3] = year[0]             ## Start Year
+                    period[4] = values[0]           ## DEM( Start )
+                    period[6] = values[1]           ## AUT( Start )
+                    period[8] = values[2]           ## POL( Start )
+            
+            
+            ## Set Previous Line Values
+            cow[1] = cow[0]
+            year[1] = year[0]
+            for i in range( 3 ) :
+                prevValues[i] = values[i]
