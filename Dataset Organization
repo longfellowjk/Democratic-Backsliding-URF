@@ -1,0 +1,304 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Sep  9 13:52:51 2024
+
+@author: longf
+"""
+
+import csv
+
+c = 300
+cMax = 300
+cX = 0
+cow = [ 0 ]*c
+country_codes = [[ 0 ]*1004]*3  ## Syntax :  [ 0: c  1: VDem 2: Polity 3: World Bank ][ COW Code ] = returns country code
+
+y = 125
+yMax = 125
+
+vd_indicators = [[[ 0.0 ]*y ]*c ]*5   ## Syntax :  [ 0: Polyarchy 1: LibDem 2: PartipDem 3: DelibDem 4: EgalDem ][ c code ][ y ]
+names = [[[ "" ]*2 ]*3 ]*c   ## Syntax :  [ c code ][ Dataset: 0: V-Dem 1: Polity 2: World Bank ][ Type: 0: Alpha Code 1: Full Name ]
+vd_avail = [[[[ True ]*2 ]*5 ]*y ]*c   ## Syntax :  [ c ][ y ][ 0: Polyarchy 1: LibDem 2: PartipDem 3: DelibDem 4: EgalDem ][ 0: Indicator 1: Change ]
+header = [""]*100
+h = 0
+
+##   VDem Dataset
+
+with open ( 'C:/Users/longf/Desktop/School Work/Undergraduate Research Fellowship/Data Analysis/Datasets/Dataset CSV Files/V-Dem (Raw CSV).csv',
+           'r' ) as csv_file:
+    inputFile = csv.reader(csv_file, delimiter=',')
+    csv_reader = csv.reader(csv_file, delimiter=',')
+    
+    c = 0
+    
+    firstLine = True
+
+    for line in csv_reader :
+        
+        if firstLine is True :
+            header[ 0 ] = line[ 0 ]
+            header[ 1 ] = line[ 1 ]
+            header[ 2 ] = line[ 2 ]
+            header[ 3 ] = line[ 4 ]
+            header[ 4 ] = line[ 5 ]
+            header[ 5 ] = line[ 6 ]
+            header[ 6 ] = line[ 7 ]
+            header[ 7 ] = line[ 8 ]
+            header[ 8 ] = line[ 9 ]
+            h = 9
+            firstLine = False
+        else :
+        
+            code = int(line[ 4 ])
+        
+            newC = True
+            for i in range( cMax ) :
+                if code == cow[ i ] :
+                    newC = False
+            if newC is True :
+                ##print( "Saving New Country Info" )
+                c += 1
+                cX += 1
+                cow[ c ] = code
+                country_codes[ 1 ][ code ] = line[ 2 ]
+                country_codes[ 0 ][ code ] = c
+                names[ c ][ 0 ][ 0 ] = line[ 1 ]
+                names[ c ][ 0 ][ 1 ] = line[ 0 ]
+        
+            y = int( line[ 3 ] ) - 1900
+        
+            if y < 0 : 
+                print( "Year is Ineligible, Skipping...")
+            else : 
+                
+                for i in range( 5 ) :
+                    
+                    x = i + 5
+                    
+                    if line[ x ] != '' :
+                        
+                        vd_indicators[ i ][ c ][ y ] = line[ x ]
+                    
+                    else : 
+                        
+                        vd_avail[ c ][ y ][ i ][ 0 ] = False
+                    
+                    if y != 0 :
+                        if vd_avail[ c ][ y-1 ][ i ][ 0 ] is False :
+                            vd_avail[ c ][ y ][ i ][ 1 ] = False
+                    else :
+                        vd_avail[ c ][ y ][ i ][ 1 ] = False
+
+print( "cX =", cX )
+
+## Polity Dataset
+p_values = [[[ 0 ]*yMax ]*cMax ]*4  ## Syntax :  [ 0: DEM 1: AUT 2: POL 3: POL2 ][ c ][ y ]
+p_avail = [[[ False ]*cMax ]*yMax ]*2   ## Syntax :  [ 0: Indicator 1: Change ][ c ][ y ]
+
+
+with open ( 'C:/Users/longf/Desktop/School Work/Undergraduate Research Fellowship/Data Analysis/Datasets/Dataset CSV Files/Polity 5 (CSV).csv',
+           'r' ) as csv_file:
+    inputFile = csv.reader(csv_file, delimiter=',')
+    csv_reader = csv.reader(csv_file, delimiter=',')
+    
+    c = 0
+    
+    firstLine = True
+
+    for line in csv_reader :
+        
+        if firstLine is True :
+            header[ 9 ] = line[ 2 ]
+            header[ 10 ] = line[ 3 ]
+            header[ 11 ] = line[ 4 ]
+            header[ 12 ] = line[ 5 ]
+            header[ 13 ] = line[ 8 ]
+            header[ 14 ] = line[ 9 ]
+            header[ 15 ] = line[ 10 ]
+            header[ 16 ] = line[ 11 ]
+            h = 17
+            firstLine = False
+            print( header )
+        else :
+            
+            cCode = int( line[2] )
+            sCode = line[3]
+            country = line[4]
+            year = line[5]
+            democ = line[8]
+            autoc = line[9]
+            polity = line[10]
+            polity2 = line[11]
+            
+            if cCode != cow[ c ] :
+                newC = True
+                for i in range( cMax ) :
+                    if cCode == cow[ i ] :
+                        newC = False
+                        country_codes[ 2 ][ code ] = cCode
+                        names[ c ][ 1 ][ 0 ] = sCode
+                        names[ c ][ 1 ][ 1 ] = country
+                        ##print( "Saving New for Polity Country Info" )
+                        c = i
+                if newC is True :
+                    cow[ cX ] = cCode
+                    country_codes[ 2 ][ code ] = cCode
+                    country_codes[ 0 ][ code ] = cX
+                    names[ cX ][ 1 ][ 0 ] = sCode
+                    names[ cX ][ 1 ][ 1 ] = country
+                    ##print( "TOTALLY NEW COUNTRY JUST DROPPED" )
+                    c = cX
+                    cX += 1
+            
+            y = int( year ) - 1900
+            if y > 0 :
+                
+                if democ != '' :
+                    test = int( democ )
+                    if test != -66 :
+                        if test != -77 :
+                            if test != -88 :
+                                p_values[ 0 ][ c ][ y ] = int( democ )
+                                p_avail[ 0 ][ y ][ c ] = True
+                else :
+                    p_avail[ 0 ][ y ][ c ] = False
+                    
+                if autoc != '' :
+                    test = int( autoc )
+                    if test != -66 :
+                        if test != -77 :
+                            if test != -88 :
+                                p_values[ 1 ][ c ][ y ] = int( autoc )
+                                p_avail[ 0 ][ y ][ c ] = True
+                else :
+                    p_avail[ 0 ][ y ][ c ] = False
+                
+                if polity != '' :
+                    test = int( polity )
+                    if test != -66 :
+                        if test != -77 :
+                            if test != -88 :
+                                p_values[ 2 ][ c ][ y ] = int( polity )
+                                p_avail[ 0 ][ y ][ c ] = True
+                else :
+                    p_avail[ 0 ][ y ][ c ] = False
+                
+                if polity2 != '' :
+                    test = int( polity2 )
+                    if test != -66 :
+                        if test != -77 :
+                            if test != -88 :
+                                p_values[ 3 ][ c ][ y ] = int( polity2 )
+                                p_avail[ 0 ][ y ][ c ] = True
+                else :
+                    p_avail[ 0 ][ y ][ c ] = False
+
+print( "cX =", cX )
+
+## VParty Dataset
+p = 0
+pMax = 5
+pX = 1
+vp_p = [ 0 ]*1000000   ## Returns P Value
+vp_party = [[ 0 ]*cMax ]*pMax   ## Syntax :  [ p ][ c ]
+vp_partyName = [[[ "" ]*2 ]*cMax ]*pMax   ## Syntax :  [ p ][ c ][ 0: Alpha Code 1: Full Name ]
+vp_indexes = [[[[ 0.0 ]*cMax ]*pMax ]*125 ]*10   ## Syntax :  [ Variable ][ y ][ p ][ c ]
+prevCOW = 0
+
+lineNum = 0
+
+with open ( 'C:/Users/longf/Desktop/School Work/Undergraduate Research Fellowship/Data Analysis/Datasets/Dataset CSV Files/V-Party (Raw CSV).csv',
+           'r' ) as csv_file:
+    inputFile = csv.reader(csv_file, delimiter=',')
+    csv_reader = csv.reader(csv_file, delimiter=',')
+    inputFile = open('C:/Users/longf/Desktop/School Work/Undergraduate Research Fellowship/Data Analysis/Datasets/Dataset CSV Files/V-Party (Raw CSV).csv', encoding="utf-8")
+    
+    c = 0
+    pMax = 75
+    
+    firstLine = True
+
+    for line in csv_reader :
+        
+        lineNum += 1
+        
+        if lineNum > 4750 :
+            print( "Ln#", lineNum, ": ", line )
+        
+        
+        if firstLine is True :
+            header[ 17 ] = line[ 0 ]  ##  v2paenname(0)
+            header[ 18 ] = line[ 2 ]  ##  v2pashname(2)
+            header[ 19 ] = line[ 3 ]  ##  v2paid(3)
+            header[ 20 ] = line[ 5 ]  ##  country_name(5)
+            header[ 21 ] = line[ 6 ]  ##  country_id(6)
+            header[ 22 ] = line[ 7 ]  ##  country_text_id(7)
+            header[ 22 ] = line[ 8 ]  ##  year(8)
+            header[ 23 ] = line[ 9 ]  ##  COWcode(9)
+            header[ 24 ] = line[ 10 ]  ##  v2xpa_antiplural(10) 0
+            header[ 25 ] = line[ 11 ]  ##  v2xpa_popul(11)1
+            header[ 26 ] = line[ 12 ]  ##  v2paseatshare(12) 2
+            header[ 27 ] = line[ 13 ]  ##  v2panumbseat(13) 3
+            header[ 28 ] = line[ 14 ]  ##  v2patotalseat(14) 4
+            header[ 29 ] = line[ 15 ]  ##  v2pavote(15) 5
+            header[ 30 ] = line[ 19 ]  ##  v2pagovsup(20) 6
+            header[ 31 ] = line[ 21 ]  ##  v2paanteli(22) 7
+            h = 38
+            firstLine = False
+            print( header )
+        else :
+            
+
+            cowCode = int( line[9] )
+            newC = True
+            
+            if cowCode != prevCOW :
+                p = 0
+                print( "Resetting p value" )
+                
+            
+            if cowCode != cow[ c ] :
+                
+                for i in range( cX ) :
+                    if cowCode == cow[ i ] :
+                        c = i
+                        newC = False
+                        
+                if newC is True : 
+                    
+                    c = cX
+                    cX += 1
+                    country_codes[ 0 ][ cowCode ] = c
+                    names[ c ][ 0 ][ 0 ] = line[ 1 ]
+                    names[ c ][ 0 ][ 1 ] = line[ 0 ]
+            
+            y = int( line[ 8 ] ) - 1900
+            
+            if y > 0 : 
+                
+                paid = int( line[ 3 ] )
+                ## print( paid )
+                pIdentified = False
+                if vp_p[ paid ] != p :
+                    if vp_p[ paid ] == 0 :
+                        if cowCode == prevCOW :
+                            p = pX
+                            pX += 1
+                            if p > pMax :
+                                pMax = p
+                                print( "New pMax =", pMax )
+                    else :
+                        p = vp_p[ paid ]
+                
+                vp_indexes[ 0 ][ y ][ p ][ c ] = line[ 10 ]
+                vp_indexes[ 1 ][ y ][ p ][ c ] = line[ 11 ]
+                vp_indexes[ 2 ][ y ][ p ][ c ] = line[ 12 ]
+                vp_indexes[ 3 ][ y ][ p ][ c ] = line[ 13 ]
+                vp_indexes[ 4 ][ y ][ p ][ c ] = line[ 14 ]
+                vp_indexes[ 5 ][ y ][ p ][ c ] = line[ 15 ]
+                vp_indexes[ 6 ][ y ][ p ][ c ] = line[ 20 ]
+                vp_indexes[ 7 ][ y ][ p ][ c ] = line[ 22 ]
+                vp_indexes[ 8 ][ y ][ p ][ c ] = line[ 10 ]
+                vp_indexes[ 9 ][ y ][ p ][ c ] = line[ 10 ]
+                
+            prevCOW = cowCode
