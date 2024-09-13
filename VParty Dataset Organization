@@ -1,0 +1,135 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Thu Sep 12 17:45:19 2024
+
+@author: longf
+"""
+
+import csv
+
+c = 0
+cX = 1
+cMax = 200
+cow = [ 0 ]*cMax
+prevCOW = 0
+
+y = 0
+yMax = 2023-1900
+
+p = 0
+pX = [ 1 ]*cMax
+prevPAID = 0
+pMax = 220
+cMax = 200
+paid = [[ 0 ]*cMax]*pMax
+
+data = [ [ [ [ "" ]*cMax ]*yMax ]*pMax ]*23
+seatShare = [ [ [ 0.0 ]*cMax ]*yMax ]*pMax
+available = [ [ [ False ]*cMax ]*pMax ]*yMax
+
+header = [ "" ]*25
+firstLine = True
+ln = 0
+
+with open ( 'V-Party (Raw CSV).csv', 'r' ) as csv_file:
+    inputFile = csv.reader(csv_file, delimiter=',')
+    csv_reader = csv.reader(csv_file, delimiter=',')
+    
+    
+    for line in csv_reader :
+        
+        ln += 1
+        ##print( "Line", ln, ":" )
+        
+        if firstLine is True :
+            ##print( "First Line Code" )
+            header = line
+            firstLine = False
+        else :
+            
+            
+            cCode = int( line[ 2 ] )
+            ##print( "cCode =", cCode )
+            pCode = int( line[ 0 ] )
+            ##print( "pCode =", pCode )
+            year = int( line[ 1 ] )
+            ##print( "year =", year )
+            
+            if prevCOW != cCode :
+                
+                p = 0
+                cFound = False
+                for i in range( cMax ) :
+                    if cCode == cow[ i ] :
+                        cFound = True
+                        c = i
+                if not cFound :
+                    c = cX
+                    cX += 1
+                    cow[ c ] = cCode
+                    ##print( "New cX =", cX )
+            
+            if prevPAID != pCode :
+                pFound = False
+                for i in range( pMax ) :
+                    if pCode == paid[ i ][ c ] :
+                        p = i
+                        pFound = True
+                if not pFound :
+                    p = pX[ c ]
+                    pX[ c ] += 1
+                    paid[ p ][ c ] = pCode
+                    print( "Setting paid[", p, "][", c, "] =", pCode, paid[ p ][ c ] )
+                    if pX[ c ] > pMax :
+                        pMax = pX[ c ]
+                        ##print( "New pMax =", pMax )
+            
+            y = year - 1900
+            
+            paid[ p ][ c ] = pCode
+            
+            available[ y ][ p ][ c ] = True
+            
+            for s in range( 23 ) :
+                
+                ##print( s, p, y, c )
+                data[ s ][ p ][ y ][ c ] = line[ 3 + s ]
+            
+            if data[ 2 ][ p ][ y ][ c ] :
+                seatShare[ p ][ y ][ c ] = float( data[ 2 ][ p ][ y ][ c ] )
+            else :
+                available[ y ][ p ][ c ] = False
+                ##print( "Removing a useless party" )
+            
+            if seatShare[ p ][ y ][ c ] > 1 :
+                available[ y ][ p ][ c ] = False
+                ##print( "Removing a useless party" )
+            
+            prevCOW = cCode
+            prevPAID = pCode
+            
+    ##print( "DONE", pMax )
+    
+    partyMax = 0
+    print( "Starting Party Max Search, partyMax = 0" )
+    
+    for c in range( cMax ) :
+        for y in range( yMax ) :
+            
+            partyCount = 0
+            ##print( "c", c, "y", y, ": Party Count = 0" )
+            
+            for p in range( pMax ) :
+                
+                ##print( y, p, c )
+                if available[ y ][ p ][ c ] is True :
+                    partyCount += 1
+                    ##print( "c", c, "y", y, "p", p, ": PartyCount++", partyCount )
+                ##else :
+                    ##print( "c", c, "y", y, "p", p, ": PartyCount =", partyCount )
+            
+            if partyCount > partyMax :
+                partyMax = partyCount
+                print( "NEW PARTY MAX =", partyMax )
+    
+    print( partyMax )
