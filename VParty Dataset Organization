@@ -1,135 +1,302 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Sep 12 17:45:19 2024
+Created on Fri Sep 13 01:14:08 2024
 
 @author: longf
 """
 
 import csv
-
-c = 0
-cX = 1
-cMax = 200
-cow = [ 0 ]*cMax
-prevCOW = 0
-
-y = 0
-yMax = 2023-1900
-
-p = 0
-pX = [ 1 ]*cMax
-prevPAID = 0
-pMax = 220
-cMax = 200
-paid = [[ 0 ]*cMax]*pMax
-
-data = [ [ [ [ "" ]*cMax ]*yMax ]*pMax ]*23
-seatShare = [ [ [ 0.0 ]*cMax ]*yMax ]*pMax
-available = [ [ [ False ]*cMax ]*pMax ]*yMax
-
-header = [ "" ]*25
-firstLine = True
-ln = 0
-
-with open ( 'V-Party (Raw CSV).csv', 'r' ) as csv_file:
+with open ( 'C:/Users/longf/Desktop/School Work/Undergraduate Research Fellowship/Data Analysis/Datasets/Dataset CSV Files/V-Party (Raw CSV).csv', 'r' ) as csv_file:
     inputFile = csv.reader(csv_file, delimiter=',')
     csv_reader = csv.reader(csv_file, delimiter=',')
-    
-    
-    for line in csv_reader :
+    with open( 'V-Party(1).csv', 'w' ) as s :
+        outputFile = csv.writer(s)
         
-        ln += 1
-        ##print( "Line", ln, ":" )
+        c = 180
+        p = 30
+        ##print( p )
+        s = 10
+        y = 123
         
-        if firstLine is True :
-            ##print( "First Line Code" )
-            header = line
-            firstLine = False
-        else :
+        paids = [ 0 for x in range( p ) ]
+        cows = [ 0 for x in range( c ) ]
+        data = [[ "" for x in range( s ) ] for x in range( p ) ]
+        header = [ "" for x in range( 13 ) ]
+        output = [ "" for x in range( 58 ) ]
+        ps = [ 0 for x in range( 200000 ) ]
+        years = [ False for x in range( 123 ) ]
+        
+        partyCount = 0
+        ##print( "27 partyCount =", partyCount )
+        preC = 0
+        preP = 0
+        preY = 0
+        prePreY = 1900
+        o = 0
+        c = 0
+        p = 0
+        s = 0
+        y = 0
+        
+        first = True
+        
+        for line in csv_reader :
             
-            
-            cCode = int( line[ 2 ] )
-            ##print( "cCode =", cCode )
-            pCode = int( line[ 0 ] )
-            ##print( "pCode =", pCode )
-            year = int( line[ 1 ] )
-            ##print( "year =", year )
-            
-            if prevCOW != cCode :
+            if first is True :
                 
-                p = 0
-                cFound = False
-                for i in range( cMax ) :
-                    if cCode == cow[ i ] :
-                        cFound = True
-                        c = i
-                if not cFound :
-                    c = cX
-                    cX += 1
-                    cow[ c ] = cCode
-                    ##print( "New cX =", cX )
-            
-            if prevPAID != pCode :
-                pFound = False
-                for i in range( pMax ) :
-                    if pCode == paid[ i ][ c ] :
-                        p = i
-                        pFound = True
-                if not pFound :
-                    p = pX[ c ]
-                    pX[ c ] += 1
-                    paid[ p ][ c ] = pCode
-                    print( "Setting paid[", p, "][", c, "] =", pCode, paid[ p ][ c ] )
-                    if pX[ c ] > pMax :
-                        pMax = pX[ c ]
-                        ##print( "New pMax =", pMax )
-            
-            y = year - 1900
-            
-            paid[ p ][ c ] = pCode
-            
-            available[ y ][ p ][ c ] = True
-            
-            for s in range( 23 ) :
+                header = line
+                output[ 0 ] = header[ 2 ]
+                output[ 1 ] = header[ 1 ]
                 
-                ##print( s, p, y, c )
-                data[ s ][ p ][ y ][ c ] = line[ 3 + s ]
+                x = 2
+                
+                for i in range( 5 ) :
+                    
+                    g = "Party " + str( i+1 ) + " "
+                    output[ x ] = g + header[ 0 ]
+                    x += 1
+                    
+                    for y in range( 10 ) :
+                        
+                        z = 3 + y
+                        output[ x ] = g + header[ z ]
+                        x += 1
+                    
+                print( x )
+                
+                first = False 
+                second = True
+                outputFile.writerow( output )
+                print( output )
+                output = [ "" for x in range( 58 ) ]
             
-            if data[ 2 ][ p ][ y ][ c ] :
-                seatShare[ p ][ y ][ c ] = float( data[ 2 ][ p ][ y ][ c ] )
             else :
-                available[ y ][ p ][ c ] = False
-                ##print( "Removing a useless party" )
-            
-            if seatShare[ p ][ y ][ c ] > 1 :
-                available[ y ][ p ][ c ] = False
-                ##print( "Removing a useless party" )
-            
-            prevCOW = cCode
-            prevPAID = pCode
-            
-    ##print( "DONE", pMax )
-    
-    partyMax = 0
-    print( "Starting Party Max Search, partyMax = 0" )
-    
-    for c in range( cMax ) :
-        for y in range( yMax ) :
-            
-            partyCount = 0
-            ##print( "c", c, "y", y, ": Party Count = 0" )
-            
-            for p in range( pMax ) :
                 
-                ##print( y, p, c )
-                if available[ y ][ p ][ c ] is True :
-                    partyCount += 1
-                    ##print( "c", c, "y", y, "p", p, ": PartyCount++", partyCount )
-                ##else :
-                    ##print( "c", c, "y", y, "p", p, ": PartyCount =", partyCount )
+                cow = int( line[ 2 ] )
+                year = int( line[ 1 ] )
+                paid = int( line[ 0 ] )
+                ##print( "YEAR =", year, "preY =", preY, "prePreY =", prePreY )
+                
+                outputFlag = False
+                countryFlag = False
+                yearFlag = False
+                if not second :
+                    if cow != preC :
+                        outputFlag = True
+                        countryFlag = True
+                    if year != preY :
+                        outputFlag = True
+                        yearFlag = True
+                    
+                if outputFlag is True :
+                    
+                    ##print( "OUTPUT for Year : ", preY, "prePreY =", prePreY )
+                    output[ 0 ] = preC
+                    output[ 1 ] = preY
+                    
+                    if o == 0 :
+                        p += 1
+                    
+                    if p < 5 :
+                        
+                        z = 2
+                        for x in range( p ) :
+                            
+                            output[ z ] = paids[ x ]
+                            z += 1 
+                            for y in range( 10 ) :
+                                output[ z ] = data[ x ][ y ]
+                                z += 1
+                        
+                    else : 
+                        
+                        votes = [ 0.0 for x in range( p ) ]
+                        seats = [ 0.0 for x in range( p ) ]
+                        for i in range( p ) :
+                            if data[ i ][ 3 ] :
+                                seats[ i ] = float( data[ i ][ 3 ] )
+                            if data[ i ][ 4 ] :
+                                seats[ i ] = float( data[ i ][ 4 ] )
+                        z = 2
+                        for x in range( 5 ) :
+                            maxVal = 0.0
+                            maxIndex = 0
+                            for i in range( p ) :
+                                if seats[ i ] > maxVal :
+                                    maxVal = seats[ i ]
+                                    maxIndex = i
+                                elif seats[ i ] == maxVal :
+                                    if votes[ i ] > votes[ maxIndex ] :
+                                        maxVal = seats[ i ]
+                                        maxIndex = i
+                            output[ z ] = paids[ maxIndex ]
+                            z += 1 
+                            for y in range( 10 ) :
+                                output[ z ] = data[ maxIndex ][ y ]
+                                z += 1
+                            votes[ maxIndex ] = 0.0
+                            seats[ maxIndex ] = 0.0
+                        
+                    if preY > prePreY :
+                        y = preY - prePreY
+                        ##print( "Y =", y, "preY =", preY, "prePreY =", prePreY )
+                    else :
+                        y = 2023 - preY
+                        ##print( "Y =", y, "preY =", preY, "prePreY =", prePreY )
+                    
+                    for i in range( y ) :
+                        x = prePreY + i
+                        h = x - 1900
+                        output[ 1 ] = x
+                        if x == preY :
+                            output[ 57 ] = "TRUE"
+                        else :
+                            output[ 57 ] = "FALSE"
+                        if not years[ h ] :
+                            outputFile.writerow( output )
+                            o += 1
+                            years[ h ] = True
+                        ##print( "PRINTING : ", prePreY+i )
+                            
+                    ps[ o ] = p
+                    outputFlag = False
+                    prePreY = preY
+                    output = [ "" for x in range( 58 ) ]
+                
+                if countryFlag is True :
+                    
+                    ##print( "countryTag protocol placeholder" )
+                    c += 1
+                    cows[ c ] = cow
+                    p = 0
+                    paids[ p ] = paid
+                    prePreY = year
+                    ##print( "prePreY =", prePreY )
+                    countryFlag = False
+                    years = [ False for x in range( 123 ) ]
+                    
+                elif yearFlag is True : 
+                    
+                    ##print( "yearFlag protocol placeholder" )
+                    p = 0
+                    paids[ p ] = paid
+                    yearFlag = False
+                
+                else :
+                    
+                    ##print( "No Flag Detected" )
+                    p += 1
+                    paids[ p ] = paid
+                    
+                
+                ##print( "Saving Data Values" )
+                for s in range( 10 ) :
+                    i = s + 3
+                    data[ p ][ s ] = line[ i ]
+                
+                preP = paid
+                preC = cow
+                preY = year
+                ##print( "preY =", preY, "prePreY =", prePreY )
+                ##print( "COW:", cow, "PreC:", preC, "Year:", year, "preY:", preY, "PAID:", paid, "preP:", preP )
+                second = False
+        
+        ##print( "OUTPUT for Year : ", preY, "prePreY =", prePreY )
+        output[ 0 ] = preC
+        output[ 1 ] = preY
+        
+        if o == 0 :
+            p += 1
+        
+        if p < 5 :
             
-            if partyCount > partyMax :
-                partyMax = partyCount
-                print( "NEW PARTY MAX =", partyMax )
+            z = 2
+            for x in range( p ) :
+                
+                output[ z ] = paids[ x ]
+                z += 1 
+                for y in range( 10 ) :
+                    output[ z ] = data[ x ][ y ]
+                    z += 1
+            
+        else : 
+            
+            votes = [ 0.0 for x in range( p ) ]
+            seats = [ 0.0 for x in range( p ) ]
+            for i in range( p ) :
+                if data[ i ][ 3 ] :
+                    seats[ i ] = float( data[ i ][ 3 ] )
+                if data[ i ][ 4 ] :
+                    seats[ i ] = float( data[ i ][ 4 ] )
+            z = 2
+            for x in range( 5 ) :
+                maxVal = 0.0
+                maxIndex = 0
+                for i in range( p ) :
+                    if seats[ i ] > maxVal :
+                        maxVal = seats[ i ]
+                        maxIndex = i
+                    elif seats[ i ] == maxVal :
+                        if votes[ i ] > votes[ maxIndex ] :
+                            maxVal = seats[ i ]
+                            maxIndex = i
+                output[ z ] = paids[ maxIndex ]
+                z += 1 
+                for y in range( 10 ) :
+                    output[ z ] = data[ maxIndex ][ y ]
+                    z += 1
+                votes[ maxIndex ] = 0.0
+                seats[ maxIndex ] = 0.0
+            
+        if preY > prePreY :
+            y = preY - prePreY
+            ##print( "Y =", y, "preY =", preY, "prePreY =", prePreY )
+        else :
+            y = 2023 - prePreY
+            ##print( "Y =", y, "preY =", preY, "prePreY =", prePreY )
+        
+        for i in range( y ) :
+            x = prePreY + i
+            h = x - 1900
+            output[ 1 ] = x
+            if x == preY :
+                output[ 57 ] = "TRUE"
+            else :
+                output[ 57 ] = "FALSE"
+            if not years[ h ] :
+                outputFile.writerow( output )       
+                o += 1
+                years[ h ] = True
+            ##print( "PRINTING : ", prePreY+i )
+                
+        ps[ o ] = p
+        outputFlag = False
+        prePreY = preY
+        output = [ "" for x in range( 58 ) ]
+            
     
-    print( partyMax )
+    print( "Total Outputs : ", o )
+    """totalPs = 0
+    maxi = 0
+    mini = 100
+    tenOrLess = 0
+    fiveOrLess = 0
+    for x in range( o ) :
+        totalPs += ps[ x ]
+        if ps[ x ] < mini :
+            mini = ps[ x ]
+        if ps[ x ] > maxi :
+            maxi = ps[ x ]
+        if ps[ x ] < 5 :
+            fiveOrLess += 1
+        if ps[ x ] < 10 :
+            tenOrLess += 1
+    avg = totalPs / o
+    print( "Average Parties : ", avg )
+    print( "Minimum Parties : ", mini )
+    print( "Maximum Parties : ", maxi )
+    pct = ( fiveOrLess / o )*100
+    print( "# of Outputs w/ 5 or Less Parties : ", fiveOrLess, "or", pct, "%" )
+    pct = ( tenOrLess / o )*100
+    print( "# of Outputs w/ 10 or Less Parties : ", tenOrLess, "or", pct, "%" )"""
+    
